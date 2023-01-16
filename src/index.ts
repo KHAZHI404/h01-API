@@ -14,7 +14,8 @@ export const HTTP_STATUSES = {
     NOT_FOUND_404: 404
 }
 
-export const videos = [
+export const db = {
+    videos: [
     {
         "id": 0,
         "title": "first video",
@@ -40,16 +41,26 @@ export const videos = [
         ]
     }
 ]
+}
+
 
 const parser = bodyParser({})
 app.use(parser)
 
+const resolutions = [ 'P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160' ]
+
 ///////////////////////////////
+app.delete('/__test__/data', (req, res) => {
+    db.videos = [];
+    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+}) //////этот эндпоинт обнуляет массив для тестов?
+
+
 app.get('/videos', (req: Request, res: Response) => {
     
-    return res.status(HTTP_STATUSES.OK_200).send(videos)
+    return res.status(HTTP_STATUSES.OK_200).send(db.videos)
     
-})
+}) // в сваггере есть только один возможный респонс, и в то же время обязательны тайтл и автор как это?
 
 app.post('/videos', (req: Request, res: Response) => {
     const title = req.body.title
@@ -59,32 +70,32 @@ app.post('/videos', (req: Request, res: Response) => {
 
     if (!title || title.length > 40 || typeof title !== 'string') {
         errors.push({message: 'errors in title', field: 'title'})
-        return res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
         }
 
     if (!author || author.length > 20 || typeof author !== 'string') {
         errors.push({message: 'errors in author', field: 'author'})
-        return res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
         }
-        
-        
+
+        if(errors.length){
+            return res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
+        }
+            
         const newVideo = {
             id: +(new Date()),
             title: title,
             author: author,
             availableResolutions: [
-            "P144"
+            "P144" // есть массив этих енамов, как сделать так чтобы пользователь мог задавать только их?
         ] }
 
-        videos.push(newVideo)
+        db.videos.push(newVideo)
     
-        return res.status(HTTP_STATUSES.CREATED_201).send(newVideo)
-    
+        res.status(HTTP_STATUSES.CREATED_201).send(newVideo)
     })
 
 app.get('/videos/:videoId', (req: Request, res: Response) => {
     const id = +req.params.videoId
-    const video = videos.find(v => v.id === id)
+    const video = db.videos.find(v => v.id === id)
     if(!video) {
         return res.send(HTTP_STATUSES.NOT_FOUND_404)
     } else {
@@ -109,7 +120,7 @@ app.put('/videos/:videoId', (req: Request, res: Response) => {
         }
         
 
-    const video = videos.find(v => v.id === id)
+    const video = db.videos.find(v => v.id === id)
     if (!video) {
         return res.send(HTTP_STATUSES.BAD_REQUEST_400).send('request is invalid')
     } else {
@@ -122,9 +133,9 @@ app.put('/videos/:videoId', (req: Request, res: Response) => {
 
 app.delete('/videos/:videoId', (req: Request, res: Response) => {
     const id = +req.params.videoId
-    for (let i = 0; i < videos.length; i++) {
-        if(videos[i].id === id) {
-            videos.splice(i, 1);
+    for (let i = 0; i < db.videos.length; i++) {
+        if(db.videos[i].id === id) {
+            db.videos.splice(i, 1);
             return res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
         }
     }
