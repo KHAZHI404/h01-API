@@ -14,83 +14,114 @@ export const HTTP_STATUSES = {
     NOT_FOUND_404: 404
 }
 
-export const db = {
+export const db: DbType = {
     videos: [
     {
         "id": 0,
         "title": "first video",
         "author": "Leonardo",
+        canBeDownloaded: false,
+        minAgeRestriction: null,
+        createdAt: new Date().toISOString(),
+        publicationDate: new Date().toISOString(),
         "availableResolutions": [
             "P144"
-        ]
-    },
-    {
-        "id": 1,
-        "title": "second video",
-        "author": "Ernesto",
-        "availableResolutions": [
-            "P240"
-        ]
-    },
-    {
-        "id": 3,
-        "title": "third video",
-        "author": "Mikilianjelo",
-        "availableResolutions": [
-            "P360"
         ]
     }
 ]
 }
 
+type DbType = {
+    videos: VideosType[]
+}
+
+type VideosType = {
+    id: number,
+    title: string,
+    author: string,
+    canBeDownloaded: boolean,
+    minAgeRestriction: number | null,
+    createdAt: string,
+    publicationDate: string,
+    availableResolutions: string[]
+}
 
 const parser = bodyParser({})
 app.use(parser)
 
 const resolutions = [ 'P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160' ]
 
+const validateResolutions = (inputResolutions: string[]) => {    
+    if (!inputResolutions || inputResolutions.length > resolutions.length || typeof inputResolutions !== 'object' ) {
+        return true
+    }
+
+    try {
+        for (const el of inputResolutions){
+            if (!resolutions.includes(el)) return true
+        }
+    } catch (error) {
+        return true
+    }
+
+    return null
+}
+
 ///////////////////////////////
-app.delete('/__test__/data', (req, res) => {
+app.delete('/testing/all-data', (req, res) => {
     db.videos = [];
     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
-}) //////этот эндпоинт обнуляет массив для тестов?
-
+}) 
 
 app.get('/videos', (req: Request, res: Response) => {
     
     return res.status(HTTP_STATUSES.OK_200).send(db.videos)
     
-}) // в сваггере есть только один возможный респонс, и в то же время обязательны тайтл и автор как это?
-
+})
 app.post('/videos', (req: Request, res: Response) => {
-    const title = req.body.title
-    const author = req.body.author
-    const errors = []
-
-
-    if (!title || title.length > 40 || typeof title !== 'string') {
-        errors.push({message: 'errors in title', field: 'title'})
-        }
-
-    if (!author || author.length > 20 || typeof author !== 'string') {
-        errors.push({message: 'errors in author', field: 'author'})
-        }
-
-        if(errors.length){
-            return res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
-        }
-            
-        const newVideo = {
-            id: +(new Date()),
-            title: title,
-            author: author,
-            availableResolutions: [
-            "P144" // есть массив этих енамов, как сделать так чтобы пользователь мог задавать только их?
-        ] }
-
-        db.videos.push(newVideo)
+    try {
+        const title = req.body.title
+        const author = req.body.author
+        const availableResolutions = req.body.availableResolutions
+        const errors = []
     
-        res.status(HTTP_STATUSES.CREATED_201).send(newVideo)
+    
+        if (!title || title.length > 40 || typeof title !== 'string') {
+            errors.push({message: 'errors in title', field: 'title'})
+        }
+    
+        if (!author || author.length > 20 || typeof author !== 'string') {
+            errors.push({message: 'errors in author', field: 'author'})
+        }
+        
+        if (validateResolutions(availableResolutions)) {
+            errors.push({message: 'errors in availableResolutions', field: 'availableResolutions'})
+        }
+        
+    
+        if(errors.length){
+            return res.status(HTTP_STATUSES.BAD_REQUEST_400).send({errorsMessages: errors})
+        }
+                
+        const newVideo: VideosType = {
+                id: +(new Date()),
+                title: title,
+                author: author,
+                canBeDownloaded: false,
+                minAgeRestriction: null,
+                createdAt: new Date().toISOString(),
+                publicationDate: new Date().toISOString(),
+                availableResolutions: availableResolutions,
+                
+            }
+    
+        db.videos.push(newVideo)
+        
+        return res.status(HTTP_STATUSES.CREATED_201).send(newVideo)
+    } catch (e) {
+            console.log(e);
+            return res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
+    }
     })
 
 app.get('/videos/:videoId', (req: Request, res: Response) => {
@@ -111,18 +142,20 @@ app.put('/videos/:videoId', (req: Request, res: Response) => {
 
     if (!title || title.length > 40 || typeof title !== 'string') {
         errors.push({message: 'errors in title', field: 'title'})
-        return res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
         }
 
     if (!author || author.length > 20 || typeof author !== 'string') {
         errors.push({message: 'errors in author', field: 'author'})
-        return res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
         }
         
+    if (errors.length) {
+        return res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors)
+    }
+    
 
     const video = db.videos.find(v => v.id === id)
     if (!video) {
-        return res.send(HTTP_STATUSES.BAD_REQUEST_400).send('request is invalid')
+        return res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
     } else {
         video.title = req.body.title
         video.author = req.body.author
@@ -140,7 +173,7 @@ app.delete('/videos/:videoId', (req: Request, res: Response) => {
         }
     }
     return res.status(HTTP_STATUSES.NOT_FOUND_404).send('request is invalid')
-}) 
+}) //как сменить структуру и просто сравнивать реквест ид с 
 
 ///////////////////////////////
 app.listen(port, () => {
