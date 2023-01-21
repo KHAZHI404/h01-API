@@ -65,6 +65,10 @@ export const validateResolutions = (inputResolutions: string[]) => {
 }
 
 ///////////////////////////////
+app.delete('/videos/testing/all-data', (req, res) => {
+    db.videos = [];
+    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+}) 
 app.get('/videos', (req: Request, res: Response) => {
     
     return res.status(HTTP_STATUSES.OK_200).send(db.videos)
@@ -162,10 +166,6 @@ app.delete('/videos/:videoId', (req: Request, res: Response) => {
         }
     }
     return res.status(HTTP_STATUSES.NOT_FOUND_404).send('request is invalid')
-}) 
-app.delete('/videos/testing/all-data', (req, res) => {
-    db.videos = [];
-    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 }) 
 
 app.use('/videos', videosRouter)
