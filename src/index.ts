@@ -1,7 +1,7 @@
 import express, {Request, Response} from 'express'
 import bodyParser from "body-parser";
 import { createBrotliDecompress } from 'zlib';
-import { videosRouter } from './routes/videos-router';
+//import { videosRouter } from './routes/videos-router';
 /////////////////////////
 export const app = express()
 const port = 3003
@@ -168,7 +168,7 @@ app.delete('/videos/:videoId', (req: Request, res: Response) => {
     return res.status(HTTP_STATUSES.NOT_FOUND_404).send('request is invalid')
 }) 
 
-app.use('/videos', videosRouter)
+//app.use('/videos', videosRouter)
 
 
 ///////////////////////////////
