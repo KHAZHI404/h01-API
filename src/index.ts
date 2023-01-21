@@ -133,6 +133,8 @@ app.put('/videos/:videoId', (req: Request, res: Response) => {
     const author = req.body.author
     const canBeDownloaded = req.body.canBeDownloaded
     const minAgeRestriction = req.body.minAgeRestriction
+
+    
     const publicationDate = req.body.publicationDate
     const errors = []
 
@@ -148,7 +150,7 @@ app.put('/videos/:videoId', (req: Request, res: Response) => {
         errors.push({message: 'errors in canBeDownloaded', field: 'canBeDownloaded'})
     }
     
-    if (minAgeRestriction.length < 1 && minAgeRestriction.length > 18 || typeof minAgeRestriction !== 'number') {
+    if (minAgeRestriction < 1 || minAgeRestriction > 18 || typeof minAgeRestriction !== 'number') {
         errors.push({message: 'errors in minAgeRestriction', field: 'minAgeRestriction'})
     }
 
