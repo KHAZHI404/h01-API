@@ -22,8 +22,7 @@ describe('/videos', () => {
             // .expect(HTTP_STATUSES.NOT_FOUND_404, [])
 
         expect(response.status).toBe(HTTP_STATUSES.NOT_FOUND_404)
-    }) //когда сделал тест на получение объекта есть ли смысл делать тест на ошибку при получении?
-    //как такой
+    }) 
 
     it(`should'nt create video with incorrect input data`, async () => {
         const response = await request(app)
