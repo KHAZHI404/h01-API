@@ -105,8 +105,8 @@ app.post('/videos', (req: Request, res: Response) => {
                 author: author,
                 canBeDownloaded: false,
                 minAgeRestriction: null,
-                createdAt: new Date(Date.now() + (3600 * 1000 * 24)).toISOString(),
-                publicationDate: new Date().toISOString(),
+                createdAt: new Date().toISOString(),
+                publicationDate: new Date(Date.now() + (3600 * 1000 * 24)).toISOString(),
                 availableResolutions: availableResolutions,
             }
     
