@@ -65,12 +65,12 @@ export const validateResolutions = (inputResolutions: string[]) => {
 }
 
 ///////////////////////////////
-app.get('/', (req: Request, res: Response) => {
+app.get('/videos', (req: Request, res: Response) => {
     
     return res.status(HTTP_STATUSES.OK_200).send(db.videos)
     
 })
-app.post('/', (req: Request, res: Response) => {
+app.post('/videos', (req: Request, res: Response) => {
     try {
         const title = req.body.title
         const author = req.body.author
@@ -114,7 +114,7 @@ app.post('/', (req: Request, res: Response) => {
             return res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
     }
 })
-app.get('/:videoId', (req: Request, res: Response) => {
+app.get('/videos/:videoId', (req: Request, res: Response) => {
     const id = +req.params.videoId
     const video = db.videos.find(v => v.id === id)
     if(!video) {
@@ -123,7 +123,7 @@ app.get('/:videoId', (req: Request, res: Response) => {
         return res.status(HTTP_STATUSES.OK_200).send(video)
     }
 }) 
-app.put('/:videoId', (req: Request, res: Response) => {
+app.put('/videos/:videoId', (req: Request, res: Response) => {
     const id = +req.params.videoId
     const title = req.body.title
     const author = req.body.author
@@ -153,7 +153,7 @@ app.put('/:videoId', (req: Request, res: Response) => {
 
     }
 })
-app.delete('/:videoId', (req: Request, res: Response) => {
+app.delete('/videos/:videoId', (req: Request, res: Response) => {
     const id = +req.params.videoId
     for (let i = 0; i < db.videos.length; i++) {
         if(db.videos[i].id === id) {
@@ -163,7 +163,7 @@ app.delete('/:videoId', (req: Request, res: Response) => {
     }
     return res.status(HTTP_STATUSES.NOT_FOUND_404).send('request is invalid')
 }) 
-app.delete('/testing/all-data', (req, res) => {
+app.delete('/videos/testing/all-data', (req, res) => {
     db.videos = [];
     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 }) 
