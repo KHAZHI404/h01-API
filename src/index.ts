@@ -65,7 +65,7 @@ export const validateResolutions = (inputResolutions: string[]) => {
 }
 
 ///////////////////////////////
-app.delete('/videos/testing/all-data', (req, res) => {
+app.delete('/testing/all-data', (req, res) => {
     db.videos = [];
     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 }) 
