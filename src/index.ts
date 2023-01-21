@@ -153,8 +153,12 @@ app.put('/videos/:videoId', (req: Request, res: Response) => {
         video.title = req.body.title
         video.author = req.body.author
         video.availableResolutions = req.body.availableResolutions
+        video.canBeDownloaded = req.body.canBeDownloaded
+        video.minAgeRestriction = req.body.minAgeRestriction
+        video.createdAt = req.body.createdAt
+        video.publicationDate = req.body.publicationDate
         return res.status(HTTP_STATUSES.NO_CONTENT_204).send(video)
-
+        
     }
 })
 app.delete('/videos/:videoId', (req: Request, res: Response) => {
