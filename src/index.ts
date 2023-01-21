@@ -74,13 +74,21 @@ app.get('/videos', (req: Request, res: Response) => {
     return res.status(HTTP_STATUSES.OK_200).send(db.videos)
     
 })
+app.get('/videos/:videoId', (req: Request, res: Response) => {
+    const id = +req.params.videoId
+    const video = db.videos.find(v => v.id === id)
+    if(!video) {
+        return res.send(HTTP_STATUSES.NOT_FOUND_404)
+    } else {
+        return res.status(HTTP_STATUSES.OK_200).send(video)
+    }
+}) 
 app.post('/videos', (req: Request, res: Response) => {
     try {
         const title = req.body.title
         const author = req.body.author
         const availableResolutions = req.body.availableResolutions
         const errors = []
-    
     
         if (!title || title.length > 40 || typeof title !== 'string') {
             errors.push({message: 'errors in title', field: 'title'})
@@ -118,19 +126,12 @@ app.post('/videos', (req: Request, res: Response) => {
             return res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
     }
 })
-app.get('/videos/:videoId', (req: Request, res: Response) => {
-    const id = +req.params.videoId
-    const video = db.videos.find(v => v.id === id)
-    if(!video) {
-        return res.send(HTTP_STATUSES.NOT_FOUND_404)
-    } else {
-        return res.status(HTTP_STATUSES.OK_200).send(video)
-    }
-}) 
+
 app.put('/videos/:videoId', (req: Request, res: Response) => {
     const id = +req.params.videoId
     const title = req.body.title
     const author = req.body.author
+    const canBeDownloaded = req.body.canBeDownloaded
     const errors = []
 
     if (!title || title.length > 40 || typeof title !== 'string') {
@@ -141,26 +142,31 @@ app.put('/videos/:videoId', (req: Request, res: Response) => {
         errors.push({message: 'errors in author', field: 'author'})
     }
 
+    if (typeof canBeDownloaded !== 'boolean') {
+        errors.push({message: 'errors in canBeDownloaded', field: 'canBeDownloaded'})
+    }
+
     if (errors.length) {
         return res.status(HTTP_STATUSES.BAD_REQUEST_400).send({errorsMessages: errors})
     }
 
-
     const video = db.videos.find(v => v.id === id)
+
     if (!video) {
         return res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
     } else {
-        video.title = req.body.title
-        video.author = req.body.author
-        video.availableResolutions = req.body.availableResolutions
+        video.title = title
+        video.author = author
         video.canBeDownloaded = req.body.canBeDownloaded
         video.minAgeRestriction = req.body.minAgeRestriction
         video.createdAt = req.body.createdAt
         video.publicationDate = req.body.publicationDate
+        video.availableResolutions = req.body.availableResolutions
         return res.status(HTTP_STATUSES.NO_CONTENT_204).send(video)
-        
     }
 })
+
+
 app.delete('/videos/:videoId', (req: Request, res: Response) => {
     const id = +req.params.videoId
     for (let i = 0; i < db.videos.length; i++) {
