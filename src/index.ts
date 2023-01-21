@@ -153,7 +153,7 @@ app.put('/videos/:videoId', (req: Request, res: Response) => {
         video.title = req.body.title
         video.author = req.body.author
         video.availableResolutions = req.body.availableResolutions
-        return res.status(HTTP_STATUSES.OK_200).send(video)
+        return res.status(HTTP_STATUSES.NO_CONTENT_204).send(video)
 
     }
 })
